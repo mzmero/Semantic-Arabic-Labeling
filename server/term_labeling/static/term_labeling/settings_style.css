@@ -1,0 +1,12 @@
+.card-body {
+    display: none;
+}
+
+.card-header {
+    cursor: pointer;
+
+}
+
+i {
+    color: #2e9c9a;
+}

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block stylesheets %}
+<script src="{% static 'term_labeling/statistics.js' %}"></script>
+<script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+<script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'term_labeling/statistics_style.css'%}">
+<!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">-->
+<!--<script src='https://kit.fontawesome.com/a076d05399.js'></script>-->
+<script>
+    $(document).ready(function () {
+        const obj = document.getElementById("4link");
+        const clickedItem = $(obj);
+        $(".nav-link").each(function () {
+            $(this).removeClass("text-dark");
+        });
+        clickedItem.addClass("text-info");
+    });
+</script>
+{% endblock stylesheets %}
+
+
+{% block content %}
+<div class="container text-center">
+    <div class="page-header pt-4">
+        <h1>Statistics</h1>
+    </div>
+    <div class="container mb-5 mt-5">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card-counter primary">
+                    <i class="fa fa-users"></i>
+                    <span class="count-numbers">{{ info.poetsNum }}</span>
+                    <span class="count-name">Poets</span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card-counter danger">
+                    <i class="fa fa-book"></i>
+                    <span class="count-numbers">{{ info.poemsNum }}</span>
+                    <span class="count-name">Poems</span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card-counter success">
+                    <i class="fa fa-globe"></i>
+                    <span class="count-numbers">{{ info.tokensNum }}</span>
+                    <span class="count-name">Tokens</span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card-counter info">
+                    <i class="fa fa-file-text-o"></i>
+                    <span class="count-numbers">{{ info.termsNum }}</span>
+                    <span class="count-name">Terms</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+               aria-selected="true">Word Cloud</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="list-tab" data-toggle="tab" href="#list" role="tab" aria-controls="list"
+               aria-selected="false">List View</a>
+        </li>
+         <li class="nav-item">
+            <a class="nav-link" id="tag-tab" data-toggle="tab" href="#tag" role="tab" aria-controls="tag"
+               aria-selected="false">Poems</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <h3>Word Cloud</h3>
+            <div>
+                To generate a world cloud choose the desired filters
+                <br> Period -
+                <div class="dropdown">
+                    <input type="button" id="periodbtn" class="dropbtn" value="All Periods" data-toggle="tooltip"
+                           data-placement="top" title="Which Period to Focus On">
+                    <div class="dropdown-content">
+                        <a href="javascript:void(0)" onclick="savePeriod(this)">All Periods</a>
+                        {% for p in periods %}
+                        <a href="javascript:void(0)" onclick="savePeriod(this)"> {{p}} </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <br> Number of words to show -
+                <div class="dropdown">
+                    <input type="button" id="topbtn1" class="dropbtn" value="# of words" data-toggle="tooltip"
+                           data-placement="top"
+                           title="Show the Top N most frequent words based on specific period or all data">
+                    <div id="Frequency1" class="dropdown-content">
+                        {% for f in frequency %}
+                        <a href="javascript:void(0)" onclick="createWordCloud(this,event,1)"> {{f}} </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <br> Range of words
+                <div class="dropdown">
+                    <input type="button" id="rangebtn1" class="dropbtn" value="Range" data-toggle="tooltip"
+                           data-placement="top"
+                           title="Show the top x to top y most frequent words when the range of words is [x,y]">
+                    <div id="Range1" class="dropdown-content">
+                        {% for r in range %}
+                        <a href="javascript:void(0)" id="{{r}}" onclick="createWordCloud(this,event,2)"> {{r}} </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <br><br>
+            <div id="cloud" style="height:700px">
+                <div id="loader" class="bookshelf_wrapper">
+                    <ul class="books_list">
+                        <li class="book_item first"></li>
+                        <li class="book_item second"></li>
+                        <li class="book_item third"></li>
+                        <li class="book_item fourth"></li>
+                        <li class="book_item fifth"></li>
+                        <li class="book_item sixth"></li>
+                    </ul>
+                    <div class="shelf"></div>
+                </div>
+                <img src="{% static 'term_labeling/img/World_cloud.png'%}">
+            </div>
+        </div>
+        <div class="tab-pane fade show" id="list" role="tabpanel" aria-labelledby="list-tab">
+            <h3 id="tablePageHeader">Table</h3>
+            <br><label> Choose a Period </label><br>
+            <div class="dropdown">
+                <input type="button" id="period2btn" class="dropbtn" value="Periods" data-toggle="tooltip"
+                       data-placement="top" title="Which Period to Focus On" style="padding: 0 50 0 50;">
+                <div class="dropdown-content">
+                    <a href="javascript:void(0)" id ="all periods" onclick="createList(this,event)">All Periods</a>
+                    {% for p in periods %}
+                    <a href="javascript:void(0)" id ="{{p}}" onclick="createList(this,event)"> {{p}} </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <br><br><br>
+            <div style="height:700px">
+                <div id="loader2" class="bookshelf_wrapper">
+                    <ul class="books_list">
+                        <li class="book_item first"></li>
+                        <li class="book_item second"></li>
+                        <li class="book_item third"></li>
+                        <li class="book_item fourth"></li>
+                        <li class="book_item fifth"></li>
+                        <li class="book_item sixth"></li>
+                    </ul>
+                    <div class="shelf"></div>
+                </div>
+                <table class="table" id="listTable" style="font-family:initial">
+                    <thead class="thead-dark">
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade show" id="tag" role="tabpanel" aria-labelledby="tag-tab">
+            <h3 >Tags in Poems</h3>
+            <div class=".col-md- mt-5">
+                <label> Choose a Poet </label><br>
+                <div class="dropdown" style="margin-bottom:40px">
+                    <input type="button" id="poetbtn" class="dropbtn" value="Poet" style="padding:3 70px 3 70px">
+                        <div id="poetDropDown" class="dropdown-content">
+                            <input type="text" placeholder="إبحث..." id="poetInput"
+                             onkeyup="filterFunction('poetDropDown',this.id)">
+                            {% for p in poets %}
+                                <a href="javascript:void(0)" onclick="get_tags_for_poet(this)" id="{{p.id}}"> {{ p.name }} </a>
+                            {% endfor %}
+                        </div>
+                </div>
+                <div id="ExcelDownload" style="text-align:left;Display:none"><a href="javascript:void(0)" onclick="ConvertToExcel()">Download to Excel</a></div>
+                <div style="height:700px">
+                    <table class="table" id="tagTable" style="font-family:initial">
+                        <thead class="thead-dark">
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

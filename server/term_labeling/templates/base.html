@@ -1,0 +1,201 @@
+{% load static %}
+
+<html lang="ar">
+
+<head>
+    {% if title %}
+    <title> Arabic Tagging - {{ title }} </title>
+    {% else %}
+    <title> Arabic Tagging </title>
+    {% endif %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="https://cdn.neo4jlabs.com/neovis.js/v1.5.0/neovis.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"-->
+    <!--          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">-->
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    {% block stylesheets %} {% endblock %}
+    <link rel="stylesheet" type="text/css" href="{% static 'term_labeling/base_style.css'%}">
+</head>
+
+<body>
+<!--Navbar -->
+
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-lg p-3" id="mynavbar">
+    <div class="container">
+        <a class="navbar-brand NavBold" href="{% url 'index' %}">WTCAP</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="true" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link text-dark" id="1link" href="{% url 'index' %}"> Main Page <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link text-dark" id="2link" href="{% url 'select_poet_page' %}">Poems</a>
+                <a class="nav-item nav-link text-dark" id="3link" href="{% url 'tags' %}">Manage Tags</a>
+                <a class="nav-item nav-link text-dark" id="4link" href="{% url 'statistics' %}">Statistics</a>
+                {% if user.is_superuser %}
+                <a class="nav-item nav-link text-dark" id="5link" href="{% url 'settings' %}">Settings</a>
+                {% endif %}
+            </div>
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav ml-auto">
+                {% if user.is_authenticated %}
+                <span class="navbar-text">
+                Logged in as {{ request.user.username }}
+            </span>
+                <a class="nav-item nav-link text-danger" href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                <a class="nav-item nav-link text-success" href="{% url 'login' %}">Login</a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="container">
+    {% for message in messages %}
+    <br>
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!--            about section            -->
+
+<div class="about">
+    <a class="bg_links social info" data-toggle="modal" data-target="#myinfo">
+        <span class="icon"></span>
+    </a>
+    <a class="bg_links social above" href="#top">
+        <span class="icon"></span>
+    </a>
+    {% if user.is_authenticated %}
+    <a class="bg_links social history" data-toggle="modal" data-target="#myhistory">
+        <span class="icon"></span>
+    </a>
+    {% else %}
+    <a class="bg_links social history" data-toggle="modal" data-target="#myhistory2">
+        <span class="icon"></span>
+    </a>
+    {% endif %}
+    <a class="bg_links logo"></a>
+</div>
+
+<div class="modal fade" id="myinfo" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="paper-modal">
+            <div class="modal-header">
+                <h4 class="modal-title">Info</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align:left;">
+            </div>
+        </div>
+    </div>
+</div>
+ {% if user.is_authenticated %}
+<div class="modal fade" id="myhistory" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="paper-modal">
+            <div class="modal-header">
+                <h4 class="modal-title">History</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">القصيدة</th>
+                        <th scope="col">الشاعر</th>
+                        <th scope="col"> آخر تعديل</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="modal fade" id="myhistory2"role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="paper-modal">
+            <div class="modal-header">
+                <h4 class="modal-title">History</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <h3>Access denied</h3>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% block content %} {% endblock %}
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+<!-- Optional JavaScript -->
+{% block scripts %} {% endblock %}
+<script>
+    $(document).ready(function () {
+        $('#myhistory').on('shown.bs.modal', function (e) {
+            get_history().done(function(d){
+                data = d.data
+                hist = document.getElementById('myhistory')
+                tbody = hist.getElementsByTagName('tbody')[0]
+                newhtml = ""
+                data.forEach(function(h){
+                    newhtml += "<tr onclick=\"window.location='/main_tag_page/?poem_id="+h.poem_id+"'\"> <td>"+h.poem_title+"</td> <td>"+h.poet_name+"</td> <td>"+h.time+"</td></tr>"
+                })
+                tbody.innerHTML = newhtml;
+            });
+         });
+       function get_history(){
+         return $.ajax({
+            type: "GET",
+            url: "get_history_user/",
+            dataType: "json",
+            });
+        }
+        $("a[href='#top']").on('click', function(event) {
+           $("html, body").animate({ scrollTop: 0 }, "slow");
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

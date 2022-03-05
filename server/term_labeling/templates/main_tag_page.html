@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block stylesheets %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'term_labeling/main_tags_style.css'%}">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://rawgit.com/farzher/fuzzysort/master/fuzzysort.js"></script>
+<script>
+    $(document).ready(function () {
+        const d = document.getElementsByClassName("navbar")[0];
+        d.style.position = "inherit";
+    });
+</script>
+{% endblock stylesheets %}
+
+
+{% block content %}
+<h3 id="poem_id" style="display:none">{{poem_id}}</h3>
+
+<!-- Toast -->
+<div id="toast_container">
+    <div class="toast" id="myToast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="20000">
+        <div class="toast-header">
+            <strong class="mr-auto">Error</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"
+                    onclick="$('#myToast').fadeOut().attr('class', 'toast danger_toast');">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body" id="toast-body">
+        </div>
+    </div>
+</div>
+
+<div id="tag-menu" class="tag-menu">
+    <ul class="tag-menu__items">
+        <li class="tag-menu__item">
+            <a href="#" class="tag-menu__link" onclick="add_tag_to_selected(this, event)">
+                <i class="fa fa-plus"></i> Add to tags
+            </a>
+        </li>
+        <li class="tag-menu__item">
+            <a href="#" class="tag-menu__link" data-action="View" data-toggle="modal"
+               data-target="#insertParentModal">
+                <i class="fa fa-level-up"></i> Add parent
+            </a>
+        </li>
+        <li class="tag-menu__item">
+            <a href="#" class="tag-menu__link" data-action="View" data-toggle="modal"
+               data-target="#insertChildModal">
+                <i class="fa fa-level-down"></i> Add child
+            </a>
+        </li>
+        <li class="tag-menu__item">
+            <a href="#" class="tag-menu__link" data-action="Edit" data-toggle="modal" data-target="#editNameModal">
+                <i class="fa fa-edit"></i> Edit tag name
+            </a>
+        </li>
+        <li class="tag-menu__item">
+            <a href="#" class="tag-menu__link" data-action="Change" data-toggle="modal"
+               data-target="#changeParentModal">
+                <i class="fa fa-scissors"></i> Change parent
+            </a>
+        </li>
+        <li class="tag-menu__item">
+            <a href="#" class="tag-menu__link" data-action="Delete" data-toggle="modal"
+               data-target="#deleteModal">
+                <i class="fa fa-eraser"></i> Delete tag
+            </a>
+        </li>
+        <li class="tag-menu__item">
+            <a href="#" class="tag-menu__link" data-action="Delete" data-toggle="modal"
+               data-target="#deleteAllModal">
+                <i class="fa fa-trash-o"></i> Delete all
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+<!--showAllModal-->
+<div class="modal fade" id="showAllModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">All Tags</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table is-rtl center" id="listTable" style="font-family:initial">
+                    <thead class="thead-dark" id="Fchild">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tag</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Definition modal -->
+<div class="modal fade" id="definitionModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <!-- Modal content-->
+        <div class="paper-modal">
+            <div class="modal-header">
+                <h4 class="modal-title">Definition</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="book" id="book_loader">
+                    <div class="book__page"></div>
+                    <div class="book__page"></div>
+                    <div class="book__page"></div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <a href="#" target="_blank">Source</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit poem modal -->
+<div class="modal fade" id="editPoemModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="paper-modal edit">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit poem line</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group-lg">
+                    <input id="edited-sadr" dir="rtl" aria-label="Large" class="form-control" type="text">
+                    <input id="edited-ajuz" dir="rtl" aria-label="Large" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button class="btn btn-secondary" value="Add" onclick="save_edited_line()">Save</button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Insert parent modal -->
+<div class="modal fade" id="insertParentModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add parent</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" id="parent-name" name="parent-name"
+                       placeholder="Parent name" required type="text">
+            </div>
+            <div class="modal-footer ">
+                <button class="btn btn-secondary" value="Add" onclick="new_parent()">Save</button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Change parent modal -->
+<div class="modal fade" id="changeParentModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Change parent</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" id="change-parent" name="parent-name"
+                       placeholder="Parent name" required type="text">
+            </div>
+            <div class="modal-footer ">
+                <button class="btn btn-secondary" value="Add" onclick="change_parent()">Save</button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Insert child modal-->
+<div class="modal fade" id="insertChildModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add child</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" id="child-name" name="parent-name"
+                       placeholder="Child name" required type="text">
+            </div>
+            <div class="modal-footer ">
+                <button class="btn btn-secondary" value="Add" onclick="new_child()">Save</button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Insert root modal -->
+<div class="modal fade" id="insertRootModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Root</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" id="root-name" name="parent-name"
+                       placeholder="Root name" required type="text">
+            </div>
+            <div class="modal-footer ">
+                <button class="btn btn-secondary" value="Add" onclick="new_root()">Save</button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--TODO - switch placeholder to be the current tag name -->
+<!-- Edit tag name popup-->
+<div class="modal fade" id="editNameModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit tag name</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" id="edited-name" name="parent-name"
+                       placeholder="new name" required type="text">
+            </div>
+            <div class="modal-footer ">
+                <button class="btn btn-secondary" value="Add" onclick="edit_tag()">Save</button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Confirm delete modal -->
+<div class="modal fade" id="deleteModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Are you sure?</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p> If you continue you will delete this tag and all it's children will get "leveled" up. </p>
+            </div>
+            <div class="modal-footer ">
+                <button class="btn btn-danger" value="Add" onclick="delete_tag()" data-dismiss="modal">Delete
+                </button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Confirm delete all modal-->
+<div class="modal fade" id="deleteAllModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Are you sure?</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p> If you continue you will delete this tag and all it's children. </p>
+            </div>
+            <div class="modal-footer ">
+                <button class="btn btn-danger" value="Add" onclick="delete_all()" data-dismiss="modal">Delete All
+                </button>
+                <br>
+                <button class="btn darkBackground" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="term-menu" class="term-menu">
+    <ul class="term-menu__items">
+        <li class="term-menu__item">
+            <a id="mergeMe" href="javascript:void(0)" class="term-menu__link" onclick="merge_term(this, event)">
+                <i class="fa fa-compress"></i> Merge a second term
+            </a>
+        </li>
+        <li class="term-menu__item">
+            <a href="#" class="term-menu__link" data-action="View" data-toggle="modal" data-target="#definitionModal"
+               onclick="getDefinition()">
+                <i class="fa fa-book"></i> Get definition
+            </a>
+        </li>
+        <li class="term-menu__item">
+            <a href="#" class="term-menu__link" data-action="Edit" data-toggle="modal" data-target="#editPoemModal"
+               onclick="buildLine(this.id)">
+                <i class="fa fa-edit"></i> Edit
+            </a>
+        </li>
+    </ul>
+</div>
+
+<div class="container text-center" id="main_cont" onload="initialize_index()">
+    <br>
+    <div class="page-header">
+        <h1>{{ poems.name }}</h1>
+    </div>
+    <br>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true" style="direction:ltr">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h3 class="modal-title w-100" id="exampleModalLabel">Current Tags</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link" id="graph-tab" data-toggle="tab" href="#graph" role="tab" aria-controls="graph" aria-selected="true">Graph</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="list-tab" data-toggle="tab" href="#list" role="tab" aria-controls="list" aria-selected="false">list</a>
+                      </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                      <div class="tab-pane fade show active" id="graph" role="tabpanel" aria-labelledby="graph-tab">
+                            <body>
+                                <div id="viz" style="height:400px;width=200px"></div>
+                            </body>
+                            <div id="graphFooter" style="text-align:left">
+                                <svg height="40" width="70">
+                                    <circle cx="10" cy="10" r="7" fill="yellow"/>
+                                    <text text-anchor="start" x="20" y="14">Word</text>
+                                    <circle cx="10" cy="30" r="7" fill="#5dade2"/>
+                                    <text text-anchor="start" x="20" y="34">Tag</text>
+                                </svg>
+                                <button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="Top"
+                                        title="Refresh the Graph in case the graph isn't displaying correctly"
+                                        style="float:right" onclick="refreshVis()">Refresh</button>
+                                 <button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="left"
+                                        title="Download as Image"
+                                        style="float:right" onclick="Convert_to_Png(event)">Download</button>
+                            </div>
+                      </div>
+                      <div class="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab">
+                            <table class="table" id="TaglistTable" style="font-family:initial">
+                                <thead class="thead-dark">
+                                </thead>
+                            </table>
+                           <div style="text-align:left"><a href="#" onclick="ConvertToExcel()">Download to Excel</a></div>
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <!-- Tags Section -->
+        <div class="col-sm-4 px-lg-4" id="fixed_cont"
+             style="position:sticky;top:20px;align-self: flex-start;z-index:1;">
+            <!-- Large modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Show Current
+                Tags
+            </button>
+            <!-- Selected Tags Section-->
+            <div id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="Mycard">
+                    <h5 class="Mycardheader" role="tab" id="headingOne">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true"
+                           aria-controls="collapseOne" class="d-block">
+                            <i class="fa fa-chevron-down pull-right"></i> Selected Tags</a>
+                    </h5>
+
+                    <div id="collapseOne" class="collapse show" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="selected_container"></div>
+                    </div>
+                </div>
+                <div class="Mycard">
+                    <h5 class="Mycardheader" role="tab" id="headingTwo">
+                        <a class="collapsed d-block" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"
+                           aria-expanded="true" aria-controls="collapseTwo">
+                            <i class="fa fa-chevron-down pull-right"></i> Suggestions </a>
+                    </h5>
+                    <div id="collapseTwo" class="collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="suggested_container"></div>
+                        <div id="All_suggestions"style="display:none;flex-direction:flex-end">
+                            <a class="btn btn-light" href="javascript:void(0)" data-toggle="tooltip" data-placement="left" title="Add All Suggestions to Current Term" onclick="btn_add_all_suggestions()">
+                            <i class="fa fa-plus" style="color:#0056b3"></i></a></div>
+                    </div>
+                </div>
+                <div class="Mycard">
+                    <h5 class="Mycardheader" role="tab" id="headingThree">
+                        <a class="collapsed d-block" data-toggle="collapse" data-parent="#accordion"
+                           href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+                            <i class="fa fa-chevron-down pull-right"></i> Tags</a>
+                    </h5>
+                    <div id="collapseThree" class="collapse" role="tabpanel" aria-labelledby="headingThree">
+                        <div class="card-body">
+                            <div class="treeview">
+                                <div id="fixed_functions">
+                                    <input type="text" id="mySearchInput" class="form-control" aria-label="Small"
+                                           aria-describedby="inputGroup-sizing-sm"
+                                           onclick="$('#tagsDropDown').toggle();"
+                                           onkeyup="filterSearch()"
+                                           placeholder="إبحث..." title="إبحث...">
+                                    <div id="tagsDropDown">
+                                        <ul id="myUL">
+                                            {% for tag in all_tags %}
+                                            <li><a href="javascript:void(0)" id="{{ tag }}" class="dropdownbox"
+                                                   onclick="searchTag(this)">{{ tag }} </a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+
+                                    <div class="mt-1">
+                                        <button type="button" class="btn btn-outline-info"
+                                                onclick="back_home()">Reset
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info" data-action="View"
+                                                data-toggle="modal"
+                                                data-target="#insertRootModal">Add Root
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info" data-action="View"
+                                                data-toggle="modal"
+                                                data-target="#showAllModal">Show All
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <ul class="tree">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Poem Section -->
+        <div class="col-sm-8 paper">
+
+            <table class="table table-hover" id="poem">
+                {% for poem in poems.context %}
+                <tr>
+                    <td>
+                        <label> {{ poem.row_index }} </label>
+                    </td>
+                    <td>
+                        {% for term in poem.sadr %}
+                        <span class='term'
+                              id="{{forloop.parentloop.counter}}_0_{{forloop.counter}}" data-toggle="tooltip"
+                              data-placement="top">{{term}} </span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for term in poem.ajuz %}
+                        <span class='term'
+                              id="{{forloop.parentloop.counter}}_1_{{forloop.counter}}" data-toggle="tooltip"
+                              data-placement="top">{{term}} </span>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'term_labeling/mainpagejs.js' %}"></script>
+{% endblock %}
+

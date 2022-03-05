@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block stylesheets %}
+<script src="{% static 'term_labeling/settings.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'term_labeling/settings_style.css'%}">
+<script>
+    $(document).ready(function () {
+        const obj = document.getElementById("5link");
+        const clickedItem = $(obj);
+        $(".nav-link").each(function () {
+            $(this).removeClass("text-dark");
+        });
+        clickedItem.addClass("text-info");
+    });
+</script>
+
+{% endblock stylesheets %}
+
+
+{% block content %}
+<div class="container text-center">
+    <div class="page-header pt-4">
+        <h1>Settings</h1>
+    </div>
+
+    <div class="card text-center w-50 d-inline-block mt-4">
+        <!--        <img class="card-img-top bg-transparent center" src="{% static 'term_labeling/img/Novelist writing-rafiki.png' %}" alt="Card image">-->
+
+        <h4 class="card-header" id="users_header" onclick="toggle_body(this.id)"><i class="fa fa-users fa-fw"
+                                                                                    aria-hidden="true"></i> Users</h4>
+        <div class="card-body">
+            <p class="card-text">Add a new user<br>
+                <a href="{% url 'register' %}" class="btn btn-outline-info">Add User</a>
+            </p>
+            <p class="card-text">Display, Edit and Delete current users<br>
+                <a href="http://127.0.0.1:8000/admin/auth/user/" class="btn btn-outline-info">Manage Users</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="card text-center w-50 d-inline-block mt-4">
+        <h4 class="card-header" id="db_header" onclick="toggle_body(this.id)"><i class="fa fa-database fa-fw"
+                                                                                 aria-hidden="true"></i>
+            Databases</h4>
+        <div class="card-body">
+            <p class="card-text">Load any new poems added to Fozi's databse<br>
+                <a href="#" class="btn btn-outline-info">Sync Poems Database</a>
+            </p>
+            <p class="card-text">Force tags and term-tag connections database backup<br>
+                <a href="#" class="btn btn-outline-info">Backup Database</a>
+            </p>
+            <p class="card-text">Restore tags and term-tag connections from backup<br>
+                <a href="#" class="btn btn-outline-info">Restore Database</a>
+            </p>
+        </div>
+    </div>
+    <br><br>
+
+</div>
+
+
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#btn-one').click(function () {
+            $('#btn-one').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass('disabled');
+        });
+    });
+</script>
+{% endblock scripts %}

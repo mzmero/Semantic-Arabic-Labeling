@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block stylesheets %}
+<script src="{% static 'term_labeling/select_poet_js.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'term_labeling/select_poet_style.css'%}">
+<script>
+    $(document).ready(function () {
+        const obj = document.getElementById("2link");
+        const clickedItem = $(obj);
+        $(".nav-link").each(function () {
+            $(this).removeClass("text-dark");
+        });
+        clickedItem.addClass("text-info");
+    });
+</script>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container text-center" id="main_cont">
+    <br>
+    <h1 class="header"> Select a poet </h1>
+
+    <div class="container text-center">
+
+        <!-- Choose poet -->
+        <div class=".col-md- mt-5">
+            <button id="poetbtn" onclick="toggleDropDown('poetDropDown')" class="dropbtn">شاعر</button>
+            <div id="poetDropDown" class="dropdown-content">
+                <input type="text" placeholder="إبحث..." id="poetInput"
+                       onkeyup="filterFunction('poetDropDown',this.id)">
+            </div>
+        </div>
+
+        <!-- Choose poem -->
+        <div class=".col-md- mt-4" id="poetDiv" style="display:none">
+            <button id="poembtn" onclick="toggleDropDown('poemDropDown')" class="dropbtn">قصيدة</button>
+            <div id="poemDropDown" class="dropdown-content">
+                <input type="text" placeholder="إبحث..." id="poemInput" onkeyup="filterFunction('poemDropDown',this.id)">
+            </div>
+        </div>
+
+        <!-- Select button -->
+        <div class="btn btn-three mt-4" id="btn-analyze" onclick="submitPoem()" style="display:none">
+            <span onclick="submitPoem()">حلل</span>
+        </div>
+
+        <div class=".col-md mt-5">
+            <img src="{% static 'term_labeling/img/Novelist writing-rafiki.png' %}" alt="Novelist writing" width="400"
+                 height="300">
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+{% endblock scripts %}
