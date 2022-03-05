@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{% static 'term_labeling/register_style.css'%}">
+{% endblock %}
+
+{% block content %}
+<div class="container col-md-6 " id="main_container">
+    <div class="row mt-5 mr-5">
+        <div class="col-sm-8 pr-2">
+            <div class="content-section text-md-center">
+                <form method="POST" class="uni">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4">Add a new user</legend>
+                        {{ form |crispy }}
+                    </fieldset>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-outline-info">Save user</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-sm-4 pl-5">
+            <img src="{% static 'term_labeling/img/horse.png' %}" alt="idkyet" width="330" height="500">
+        </div>
+    </div>
+
+</div>
+{% endblock %}

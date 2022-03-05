@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{% static 'term_labeling/login_style.css'%}">
+{% endblock %}
+{% block content %}
+<div class="container col-md-6 " id="main_container">
+    <div class="row mt-5 mr-5 pr-5">
+         <div class="align-self-start">
+             <img src="{% static 'term_labeling/img/_logo.jpg' %}" alt="idkyet" width="300" height="400">
+         </div>
+         <div class="line"></div>
+         <div class="col-sm-6 pr-2 align-self-end">
+            <div class="content-section text-md-center">
+                <div class="card text-black" style="border:none;">
+                  <div class="card-body">
+                    <form method="post" class="uni">
+                        {% csrf_token %}
+                        <fieldset class="form-group">
+                            <legend class="border-bottom mb-4">Log In</legend>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1"><i class="fa fa-user"></i></span>
+                                <input type="text" class="form-control" placeholder="Username" name="username" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-lock"></i></span>
+                                <input type="password" class="form-control" placeholder="Password" name="password" aria-describedby="basic-addon2">
+                            </div>
+                        </fieldset>
+                        <button type="submit" class="btn btn-success">Login</button>
+                    </form>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

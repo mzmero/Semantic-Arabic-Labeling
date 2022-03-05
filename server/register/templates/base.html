@@ -1,0 +1,58 @@
+{% load static %}
+
+<html lang="ar">
+
+<head>
+    {% if title %}
+    <title> Arabic Tagging - {{ title }} </title>
+    {% else %}
+    <title> Arabic Tagging </title>
+    {% endif %}
+    <!--
+    -->
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <!-- Bootstrap CSS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'term_labeling/style.css'%}">
+    {% block stylesheets %} {% endblock %}
+</head>
+
+<body>
+<!--Navbar -->
+<div class="container">
+    <nav class="navbar navbar-expand-lg pull-left navbar-light navbar-custom">
+        <div class="collapse navbar-collapse">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="{% url 'index' %}">الصفحة الرئيسية <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="{% url 'label' %}">Tag terms</a>
+                <a class="nav-item nav-link" href="{% url 'select_poet_page' %}">Selecting Page</a>
+                <a class="nav-item nav-link" href="{% url 'tags' %}">Tags</a>
+            </div>
+        </div>
+    </nav>
+</div>
+<!--/.Navbar -->
+<div class="container"> {% block content %} {% endblock %}</div>
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+<!-- Optional JavaScript -->
+{% block scripts %} {% endblock %}
+
+</body>
+</html>
