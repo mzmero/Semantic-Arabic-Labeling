@@ -1,0 +1,255 @@
+@import "https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css";
+
+.container {
+    font-size: 1.15em;
+    direction: rtl;
+}
+
+/* table css */
+#poem {
+    border-collapse: collapse;
+    width: 90%;
+}
+
+#poem td {
+    padding: 8px;
+    font-size: 1.3em;
+    word-spacing: 4px;
+}
+
+.tblcheckbox {
+    visibility: hidden;
+}
+
+.term {
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in;
+}
+
+.term:hover {
+    color: cornflowerblue;
+}
+
+/*========================
+        Search tags
+==========================*/
+#mySearchInput {
+    display: block;
+}
+
+#tagsDropDown {
+    display: none;
+    position: absolute;
+    background-color: #feffff;
+    width: auto;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #6e6658;
+    z-index: 1;
+    text-align: right;
+}
+
+#tagsDropDown a {
+    color: black;
+    padding: 4px 14px;
+    text-decoration: none;
+    display: block;
+    border-bottom: 1px solid #8c8474;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in;
+}
+
+#tagsDropDown a:hover {
+    background-color: rgba(140, 132, 116, 0.58);
+}
+
+/*==========================
+ Containers and Tag buttons
+============================*/
+
+/* Selected, suggested and tree container*/
+.double-border {
+    border-style: double;
+    border-width: thick;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.selected_container {
+    border-color: #1d6664;
+    max-height: 300px;
+}
+
+.suggested_container {
+    border-color: #2b8987;
+}
+
+.treeview {
+    border-color: #2e9c9a;
+    -ms-user-select: none;
+    user-select: none;
+    max-height: 500px;
+    overflow: auto;
+}
+
+/* Tag buttons - selected and suggested*/
+.tag-btn {
+    border: 1px solid black;
+    background: transparent;
+    border-radius: 10px;
+    position: relative;
+    padding: 5px;
+    margin: 3px;
+    transition: 0.2s ease-in-out;
+    width: auto;
+}
+
+.btn-txt {
+    font-size: 1.15em;
+}
+
+.selected_container .tag-btn:hover {
+    border: 1px solid red;
+}
+
+.suggested_container .tag-btn:hover {
+    border: 1px solid dodgerblue;
+}
+
+i {
+    font-size: 12px;
+}
+
+/* tree style */
+ul.tree {
+    margin: 0;
+    padding: 20px 2px;
+    list-style-type: arabic-indic;
+    direction: RTL;
+    text-align: right;
+}
+
+ul.tree li {
+    list-style: none;
+    margin-left: -15px;
+    position: relative;
+}
+
+ul.tree li input {
+    cursor: pointer;
+    height: 1em;
+    right: -11px;
+    margin-right: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 2em;
+    z-index: 2;
+}
+
+ul.tree li input:checked + ul {
+    height: auto;
+    margin: 0 0 0 19px;
+}
+
+ul.tree li input:checked + ul:before {
+    content: "\f068";
+    right: -3px;
+    top: 3px;
+    position: absolute;
+}
+
+ul.tree li input:checked + ul > li {
+    display: block;
+    left: 3px;
+    margin: 0 0 -3px;
+}
+
+ul.tree li input:checked + ul > li last-child {
+    margin: 0 0 -0.063em;
+}
+
+ul.tree li input + ul {
+    padding: 0 0 0 -39px;
+}
+
+ul.tree li input + ul:before {
+    content: "\f067";
+    right: -3px;
+    top: 3px;
+    position: absolute;
+}
+
+ul.tree li input + ul > li {
+    display: none;
+    margin-right: 10px;
+    padding-right: 1px;
+}
+
+ul.tree li label {
+    cursor: pointer;
+    margin-bottom: 0;
+    margin-right: 17px;
+}
+
+ul.tree > li {
+    margin-right: 1px !important;
+}
+
+ul.tree > li a {
+    color: #606061;
+    display: block;
+    text-decoration: none;
+}
+
+ul.tree > li a:before {
+    content: "";
+    display: block;
+    float: right;
+    margin-left: -5px;
+}
+
+ul.tree > li > a:before {
+    content: "\f0c9";
+    display: block;
+    float: right;
+    margin-left: -5px;
+}
+
+ul.tree > li > a > label {
+    margin-right: 0;
+}
+
+ul.tree > li > ul > li > a > label:before,
+ul.tree > li > ul > li > ul > li > a > label:before {
+    content: "\f0c9";
+    display: block;
+    position: absolute;
+    right: -3px;
+    top: 3px;
+}
+
+/* RIGHT CLICK THINGY */
+#context-menu {
+    display: none;
+    position: absolute;
+    border-radius: 10px;
+    width: auto;
+    background: #6e6658;
+    z-index: 100;
+    padding: 5px 10px 3px;
+}
+
+.context-menu a {
+    color: white;
+    text-decoration: none;
+}
+
+.context-menu a:hover {
+    color: #112D32;
+}
+
+.context-menu a img {
+    width: 30px;
+    height: 30px;
+}
